@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dev Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --border: #1e1e1e;
+      --accent: #e8ff47;
+      --accent2: #ff4747;
+      --text: #f0ede6;
+      --muted: #555;
+      --card: #131313;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      width: 12px; height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.15s ease, width 0.2s, height 0.2s, background 0.2s;
+      transform: translate(-50%, -50%);
+    }
+    .cursor.expand {
+      width: 40px; height: 40px;
+      background: transparent;
+      border: 1.5px solid var(--accent);
+    }
+
+    /* Noise overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0.5;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 50;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.4rem 3rem;
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,10,10,0.7);
+    }
+    .nav-logo {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+    }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* HERO */
+    #hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 8rem 3rem 4rem;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg-text {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(8rem, 20vw, 22rem);
+      color: rgba(255,255,255,0.02);
+      white-space: nowrap;
+      pointer-events: none;
+      user-select: none;
+    }
+    .hero-left { position: relative; z-index: 1; }
+    .hero-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.2s forwards;
+    }
+    .hero-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(3rem, 6vw, 6.5rem);
+      line-height: 0.95;
+      margin-bottom: 1.2rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.35s forwards;
+    }
+    .hero-name em {
+      font-style: italic;
+      color: var(--accent);
+    }
+    .hero-sub {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 380px;
+      line-height: 1.75;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.5s forwards;
+    }
+    .hero-cta {
+      display: inline-flex; gap: 1rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.65s forwards;
+    }
+    .btn {
+      padding: 0.9rem 2rem;
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      font-family: 'IBM Plex Mono', monospace;
+      transition: all 0.2s;
+      cursor: none;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+    .btn-primary:hover { background: #fff; }
+    .btn-ghost {
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    .hero-right {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column;
+      align-items: flex-end; gap: 1rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.5s forwards;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 1.4rem 2rem;
+      min-width: 200px;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: var(--accent); }
+    .stat-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3.5rem;
+      line-height: 1;
+      color: var(--accent);
+    }
+    .stat-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 0.3rem;
+    }
+
+    /* MARQUEE */
+    .marquee-wrap {
+      overflow: hidden;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      background: var(--surface);
+    }
+    .marquee {
+      display: flex; gap: 3rem;
+      animation: scroll 22s linear infinite;
+      white-space: nowrap;
+    }
+    .marquee span {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .marquee span.dot { color: var(--accent); }
+
+    /* SECTION SHARED */
+    section { padding: 6rem 3rem; border-bottom: 1px solid var(--border); }
+    .section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 3rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .section-label::after {
+      content: ''; flex: 1; max-width: 60px;
+      height: 1px; background: var(--accent);
+    }
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.2rem, 4vw, 4rem);
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+    .section-title em { font-style: italic; color: var(--accent); }
+
+    /* ABOUT */
+    #about .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: start;
+    }
+    .about-text {
+      font-size: 1.05rem;
+      line-height: 1.9;
+      color: #aaa;
+    }
+    .about-text p + p { margin-top: 1.2rem; }
+    .skills-list { display: flex; flex-direction: column; gap: 1.2rem; }
+    .skill-row {
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+    .skill-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--text);
+    }
+    .skill-bar-wrap {
+      width: 140px; height: 2px;
+      background: var(--border);
+      position: relative;
+    }
+    .skill-bar {
+      height: 100%;
+      background: var(--accent);
+      width: 0;
+      transition: width 1.2s ease;
+    }
+
+    /* PROJECTS */
+    #projects .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5px;
+      background: var(--border);
+    }
+    .project-card {
+      background: var(--bg);
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+    .project-card:hover { background: var(--card); }
+    .project-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.35s ease;
+    }
+    .project-card:hover::before { transform: scaleX(1); }
+    .project-num {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+    .project-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem;
+      margin-bottom: 0.8rem;
+      line-height: 1.2;
+    }
+    .project-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+    .project-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+    .project-link {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      margin-top: 1.5rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--accent);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .project-link:hover { text-decoration: underline; }
+
+    /* EXPERIENCE */
+    #experience .exp-list { display: flex; flex-direction: column; }
+    .exp-item {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 3rem;
+      padding: 2.5rem 0;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+    .exp-item:first-child { border-top: 1px solid var(--border); }
+    .exp-meta { }
+    .exp-date {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+    .exp-company {
+      font-size: 0.9rem;
+      color: var(--text);
+      margin-top: 0.5rem;
+      font-weight: 500;
+    }
+    .exp-role {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      margin-bottom: 0.7rem;
+    }
+    .exp-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    /* CONTACT */
+    #contact {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+      gap: 6rem;
+    }
+    .contact-headline {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.5rem, 4vw, 5rem);
+      line-height: 1.05;
+    }
+    .contact-headline em { font-style: italic; color: var(--accent); }
+    .contact-sub {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 1.5rem;
+      line-height: 1.8;
+    }
+    .contact-form { display: flex; flex-direction: column; gap: 1.2rem; }
+    .form-field {
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .form-field label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    .form-field input, .form-field textarea {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.9rem 1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+      resize: none;
+    }
+    .form-field input:focus, .form-field textarea:focus {
+      border-color: var(--accent);
+    }
+    .form-submit {
+      margin-top: 0.5rem;
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 2rem 3rem;
+      display: flex; align-items: center; justify-content: space-between;
+      border-top: 1px solid var(--border);
+    }
+    footer p {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+    .social-links { display: flex; gap: 1.5rem; }
+    .social-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .social-links a:hover { color: var(--accent); }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* SCROLL REVEAL */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      nav { padding: 1.2rem 1.5rem; }
+      .nav-links { display: none; }
+      #hero { grid-template-columns: 1fr; padding: 7rem 1.5rem 3rem; }
+      .hero-right { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+      #about .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+      #projects .projects-grid { grid-template-columns: 1fr; }
+      .exp-item { grid-template-columns: 1fr; gap: 1rem; }
+      #contact { grid-template-columns: 1fr; gap: 3rem; }
+      section { padding: 4rem 1.5rem; }
+      footer { flex-direction: column; gap: 1rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Prashant Maywad</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#projects">Work</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-text">BUILD</div>
+  <div class="hero-left">
+    <p class="hero-tag">Full Stack Developer</p>
+    <h1 class="hero-name">
+      Prashant<br/><em>Maywad</em><br/>Here
+    </h1>
+    <p class="hero-sub">
+      I design and build fast, scalable, and beautiful web products — from pixel-perfect frontends to rock-solid APIs.
+    </p>
+    <div class="hero-cta">
+      <a href="#projects" class="btn btn-primary">View Work</a>
+      <a href="#contact" class="btn btn-ghost">Let's Talk</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="stat-card">
+      <div class="stat-num">8+</div>
+      <div class="stat-label">Years of Experience</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">20+</div>
+      <div class="stat-label">Projects Shipped</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">10+</div>
+      <div class="stat-label">Happy Clients</div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee">
+    <span>React</span><span class="dot">✦</span>
+    <span>Next.js</span><span class="dot">✦</span>
+    <span>Node.js</span><span class="dot">✦</span>
+    <span>PostgreSQL</span><span class="dot">✦</span>
+    <span>TypeScript</span><span class="dot">✦</span>
+    <span>Docker</span><span class="dot">✦</span>
+    <span>AWS</span><span class="dot">✦</span>
+    <span>Tailwind CSS</span><span class="dot">✦</span>
+    <span>GraphQL</span><span class="dot">✦</span>
+    <span>Redis</span><span class="dot">✦</span>
+    <span>React</span><span class="dot">✦</span>
+    <span>Next.js</span><span class="dot">✦</span>
+    <span>Node.js</span><span class="dot">✦</span>
+    <span>PostgreSQL</span><span class="dot">✦</span>
+    <span>TypeScript</span><span class="dot">✦</span>
+    <span>Docker</span><span class="dot">✦</span>
+    <span>AWS</span><span class="dot">✦</span>
+    <span>Tailwind CSS</span><span class="dot">✦</span>
+    <span>GraphQL</span><span class="dot">✦</span>
+    <span>Redis</span><span class="dot">✦</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <p class="section-label">01 — About</p>
+  <div class="about-grid">
+    <div>
+      <h2 class="section-title reveal">I build things<br/>that <em>matter.</em></h2>
+      <div class="about-text reveal">
+        <p>
+          I'm a full-stack developer based in Indore, Madhya Pradesh, passionate about building products that combine elegant design with robust engineering. I work across the entire stack — from crafting intuitive UIs to designing scalable backend systems.
+        </p>
+        <p>
+          When I'm not coding, I'm exploring new tech, contributing to open source, or drinking too much coffee. I believe great software is as much about the experience as it is the code behind it.
+        </p>
+      </div>
+    </div>
+    <div>
+      <div class="skills-list reveal">
+        <div class="skill-row"><span class="skill-name">React / Next.js</span><div class="skill-bar-wrap"><div class="skill-bar" data-width="92"></div></div></div>
+        <div class="skill-row"><span class="skill-name">Node.js / Express</span><div class="skill-bar-wrap"><div class="skill-bar" data-width="88"></div></div></div>
+        <div class="skill-row"><span class="skill-name">TypeScript</span><div class="skill-bar-wrap"><div class="skill-bar" data-width="85"></div></div></div>
+        <div class="skill-row"><span class="skill-name">PostgreSQL / MongoDB</span><div class="skill-bar-wrap"><div class="skill-bar" data-width="80"></div></div></div>
+        <div class="skill-row"><span class="skill-name">Docker / AWS</span><div class="skill-bar-wrap"><div class="skill-bar" data-width="75"></div></div></div>
+        <div class="skill-row"><span class="skill-name">GraphQL</span><div class="skill-bar-wrap"><div class="skill-bar" data-width="72"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <p class="section-label">02 — Selected Work</p>
+  <h2 class="section-title reveal">Projects that<br/><em>ship.</em></h2>
+  <br/><br/>
+  <div class="projects-grid">
+
+    <div class="project-card reveal">
+      <div class="project-num">001</div>
+      <h3 class="project-title">SaaS Dashboard</h3>
+      <p class="project-desc">A full-featured analytics dashboard with real-time data, role-based access control, and a billing system integrated with Stripe.</p>
+      <div class="project-tags">
+        <span class="tag">Next.js</span>
+        <span class="tag">PostgreSQL</span>
+        <span class="tag">Stripe</span>
+        <span class="tag">Prisma</span>
+      </div>
+      <a href="#" class="project-link">View Project →</a>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-num">002</div>
+      <h3 class="project-title">E-Commerce Platform</h3>
+      <p class="project-desc">A scalable online store with inventory management, order tracking, and a custom CMS for product management.</p>
+      <div class="project-tags">
+        <span class="tag">React</span>
+        <span class="tag">Node.js</span>
+        <span class="tag">MongoDB</span>
+        <span class="tag">Redis</span>
+      </div>
+      <a href="#" class="project-link">View Project →</a>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-num">003</div>
+      <h3 class="project-title">Real-time Chat App</h3>
+      <p class="project-desc">End-to-end encrypted messaging platform with rooms, file sharing, and notification support via WebSockets.</p>
+      <div class="project-tags">
+        <span class="tag">Socket.io</span>
+        <span class="tag">Express</span>
+        <span class="tag">React</span>
+        <span class="tag">Docker</span>
+      </div>
+      <a href="#" class="project-link">View Project →</a>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-num">004</div>
+      <h3 class="project-title">API Gateway Service</h3>
+      <p class="project-desc">Microservices API gateway with rate limiting, JWT authentication, logging, and load balancing.</p>
+      <div class="project-tags">
+        <span class="tag">Node.js</span>
+        <span class="tag">AWS</span>
+        <span class="tag">GraphQL</span>
+      </div>
+      <a href="#" class="project-link">View Project →</a>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-num">005</div>
+      <h3 class="project-title">Dev Blog Platform</h3>
+      <p class="project-desc">Markdown-powered technical blog with syntax highlighting, SEO optimization, and a newsletter subscription system.</p>
+      <div class="project-tags">
+        <span class="tag">Next.js</span>
+        <span class="tag">MDX</span>
+        <span class="tag">Tailwind</span>
+      </div>
+      <a href="#" class="project-link">View Project →</a>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-num">006</div>
+      <h3 class="project-title">Open Source CLI Tool</h3>
+      <p class="project-desc">A developer productivity CLI with project scaffolding, environment management, and Git workflow automation.</p>
+      <div class="project-tags">
+        <span class="tag">TypeScript</span>
+        <span class="tag">Node.js</span>
+        <span class="tag">npm</span>
+      </div>
+      <a href="#" class="project-link">View on GitHub →</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <p class="section-label">03 — Experience</p>
+  <h2 class="section-title reveal">Where I've<br/><em>worked.</em></h2>
+  <br/><br/>
+  <div class="exp-list">
+
+    <div class="exp-item reveal">
+      <div class="exp-meta">
+        <div class="exp-date">2023 — Present</div>
+        <div class="exp-company">Company Name</div>
+      </div>
+      <div>
+        <div class="exp-role">Senior Full Stack Developer</div>
+        <p class="exp-desc">Led development of core product features serving 50K+ users. Architected a microservices migration that reduced infrastructure costs by 40%. Mentored junior developers and established code review standards.</p>
+      </div>
+    </div>
+
+    <div class="exp-item reveal">
+      <div class="exp-meta">
+        <div class="exp-date">2021 — 2023</div>
+        <div class="exp-company">Startup Name</div>
+      </div>
+      <div>
+        <div class="exp-role">Full Stack Developer</div>
+        <p class="exp-desc">Built the MVP from scratch using Next.js and Node.js. Integrated payment systems, real-time notifications, and third-party APIs. Helped grow the platform from 0 to 10K users in 12 months.</p>
+      </div>
+    </div>
+
+    <div class="exp-item reveal">
+      <div class="exp-meta">
+        <div class="exp-date">2020 — 2021</div>
+        <div class="exp-company">Agency Name</div>
+      </div>
+      <div>
+        <div class="exp-role">Frontend Developer</div>
+        <p class="exp-desc">Delivered responsive web applications for clients across e-commerce, fintech, and media. Worked closely with designers to implement pixel-perfect UIs with smooth animations and high Lighthouse scores.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" style="padding: 6rem 3rem;">
+  <div class="contact-left reveal">
+    <p class="section-label">04 — Contact</p>
+    <h2 class="contact-headline">Let's build<br/>something<br/><em>great.</em></h2>
+    <p class="contact-sub">
+      Open to freelance projects, full-time roles, and interesting collaborations.<br/>
+      Drop me a message — I usually reply within 24 hours.
+    </p>
+    <br/>
+    <div class="social-links">
+      <a href="#">GitHub</a>
+      <a href="#">LinkedIn</a>
+      <a href="#">Twitter</a>
+      <a href="#">Resume ↗</a>
+    </div>
+  </div>
+  <div class="contact-form reveal">
+    <div class="form-field">
+      <label>Prashant Maywad</label>
+      <input type="text" placeholder="John Doe" />
+    </div>
+    <div class="form-field">
+      <label>Email</label>
+      <input type="email" placeholder="john@example.com" />
+    </div>
+    <div class="form-field">
+      <label>Message</label>
+      <textarea rows="5" placeholder="Tell me about your project..."></textarea>
+    </div>
+    <div class="form-submit">
+      <button class="btn btn-primary" style="cursor:none; border:none; width:100%; text-align:center;">Send Message</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 Prashant Maywad — Crafted with care.</p>
+  <p style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--muted);">Designed & Built by You</p>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button, .project-card, .stat-card').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('expand'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('expand'));
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 60);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Skill bars
+  const skillObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('.skill-bar').forEach(bar => {
+          bar.style.width = bar.dataset.width + '%';
+        });
+        skillObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.skills-list').forEach(el => skillObserver.observe(el));
+</script>
+</body>
+</html>
