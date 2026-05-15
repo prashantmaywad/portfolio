@@ -159,6 +159,10 @@ nav {
   pointer-events: none;
   user-select: none;
 }
+.hero-bg-text.light-mode{
+  color: rgba(208, 196, 196, 0.278);
+}
+
 
 .hero-left {
   position: relative;
